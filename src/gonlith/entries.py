@@ -1,5 +1,4 @@
 # Gonlith 로그 항목의 정규 인코딩·엄격 판독·DSSE PAE 봉투·종류별 필드 검증 (docs/format.md §2–§3)
-import base64
 import hashlib
 import json
 import re
@@ -10,10 +9,6 @@ PAE_PREFIX = b"DSSEv1 "
 ORIGIN_PREFIX = "gonlith.invalid/"
 ORIGIN_RANDOM_BYTES = 16
 SALT_BYTES = 16
-ED25519_KEY_BYTES = 32
-ED25519_NOTE_TYPE = b"\x01"
-RECOVERY_ROLE = "recovery"
-RECOVERY_RIGHTS = ["key"]
 WRITERS = ("agent", "human")
 SOURCES = ("conversation", "tool_output", "web", "file", "user_typed", "unknown")
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -23,11 +18,9 @@ TIMESTAMP_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z")
 DATE_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}")
 HEX32_PATTERN = re.compile(r"[0-9a-f]{64}")
 ORIGIN_PATTERN = re.compile(re.escape(ORIGIN_PREFIX) + r"[0-9a-f]{%d}" % (ORIGIN_RANDOM_BYTES * 2))
-ROLE_PATTERN = re.compile(r"[a-z0-9-]+")
 DECIMAL_PATTERN = re.compile(rb"0|[1-9][0-9]*")
 
-GENESIS_FIELDS = frozenset({"kind", "origin", "created_at", "keys"})
-KEY_FIELDS = frozenset({"name", "type", "public_key", "rights"})
+GENESIS_FIELDS = frozenset({"kind", "origin", "created_at"})
 MEMORY_FIELDS = frozenset(
     {
         "kind",
@@ -140,42 +133,11 @@ def _is_position(value):
     return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
 
-def decode_b64(value):
-    if not isinstance(value, str):
-        raise EntryError("base64 value must be a string")
-    try:
-        raw = base64.b64decode(value, validate=True)
-    except ValueError as error:
-        raise EntryError(f"invalid base64: {error}") from error
-    if base64.b64encode(raw).decode("ascii") != value:
-        raise EntryError("non-canonical base64")
-    return raw
-
-
-def note_key_id(name, public_key):
-    return hashlib.sha256(name.encode("utf-8") + b"\n" + ED25519_NOTE_TYPE + public_key).digest()[:4]
-
-
 def _require_fields(body, fields):
     if set(body) != fields:
         missing = sorted(fields - set(body))
         unknown = sorted(set(body) - fields)
         raise EntryError(f"field mismatch: missing {missing}, unknown {unknown}")
-
-
-def _validate_key(key, origin):
-    if not isinstance(key, dict):
-        raise EntryError("key must be an object")
-    _require_fields(key, KEY_FIELDS)
-    name = key["name"]
-    if not isinstance(name, str) or not name.startswith(origin + "/") or not ROLE_PATTERN.fullmatch(name[len(origin) + 1 :]):
-        raise EntryError("key name must be <origin>/<role>")
-    if key["type"] != "ed25519":
-        raise EntryError("genesis keys must be ed25519")
-    if len(decode_b64(key["public_key"])) != ED25519_KEY_BYTES:
-        raise EntryError("ed25519 public key must be 32 bytes")
-    if key["rights"] != RECOVERY_RIGHTS:
-        raise EntryError(f"genesis key rights must be {RECOVERY_RIGHTS}")
 
 
 def _validate_genesis(body):
@@ -184,13 +146,6 @@ def _validate_genesis(body):
         raise EntryError("invalid origin")
     if not _is_timestamp(body["created_at"]):
         raise EntryError("invalid created_at")
-    keys = body["keys"]
-    if not isinstance(keys, list) or not keys:
-        raise EntryError("genesis needs at least one key")
-    for key in keys:
-        _validate_key(key, body["origin"])
-    if len({key["name"] for key in keys}) != len(keys):
-        raise EntryError("duplicate key name")
 
 
 def _validate_valid_time(valid_from, valid_to):
@@ -243,20 +198,8 @@ def content_hash(salt, content):
     return hashlib.sha256(salt + content).hexdigest()
 
 
-def genesis_body(origin, recovery_public_key, created_at):
-    return {
-        "kind": "genesis",
-        "origin": origin,
-        "created_at": created_at,
-        "keys": [
-            {
-                "name": f"{origin}/{RECOVERY_ROLE}",
-                "type": "ed25519",
-                "public_key": base64.b64encode(recovery_public_key).decode("ascii"),
-                "rights": list(RECOVERY_RIGHTS),
-            }
-        ],
-    }
+def genesis_body(origin, created_at):
+    return {"kind": "genesis", "origin": origin, "created_at": created_at}
 
 
 def memory_body(*, space, category, digest, valid_from, valid_to, recorded_at, writer, client, session, source, derived_from):

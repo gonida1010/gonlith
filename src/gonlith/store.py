@@ -1,11 +1,7 @@
-# Gonlith SQLite 저장소: init(복구 키·genesis), 추가 전용 로그, 로그와 분리된 내용 저장 (docs/format.md §6)
-import base64
+# Gonlith SQLite 저장소: genesis 생성, 추가 전용 로그, 로그와 분리된 내용 저장 (docs/format.md §6)
 import os
 import sqlite3
 from pathlib import Path
-
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, PublicFormat
 
 from gonlith import entries
 
@@ -19,12 +15,6 @@ CREATE TRIGGER IF NOT EXISTS log_no_delete BEFORE DELETE ON log BEGIN SELECT RAI
 
 class StoreError(RuntimeError):
     pass
-
-
-def recovery_key_text(name, private_seed, public_key):
-    key_id = entries.note_key_id(name, public_key).hex()
-    encoded = base64.b64encode(entries.ED25519_NOTE_TYPE + private_seed).decode("ascii")
-    return f"PRIVATE+KEY+{name}+{key_id}+{encoded}"
 
 
 class Store:
@@ -55,11 +45,8 @@ class Store:
         return result
 
     def initialize(self):
-        private_key = Ed25519PrivateKey.generate()
-        seed = private_key.private_bytes(Encoding.Raw, PrivateFormat.Raw, NoEncryption())
-        public_key = private_key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
         origin = entries.ORIGIN_PREFIX + os.urandom(entries.ORIGIN_RANDOM_BYTES).hex()
-        body = entries.genesis_body(origin, public_key, entries.now_timestamp())
+        body = entries.genesis_body(origin, entries.now_timestamp())
         entries.validate(body, 0)
 
         def work(cursor):
@@ -68,7 +55,7 @@ class Store:
             cursor.execute("INSERT INTO log(position, entry) VALUES (0, ?)", (entries.wrap(body),))
 
         self._transaction(work)
-        return recovery_key_text(body["keys"][0]["name"], seed, public_key)
+        return origin
 
     def append_memory(self, content, *, space, category, valid_from, valid_to, writer, client, session, source, derived_from):
         if not isinstance(content, str) or content == "":

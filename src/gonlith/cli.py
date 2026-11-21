@@ -1,4 +1,4 @@
-# gonlith 명령줄: 데이터 폴더 초기화(init)와 로그 전체 재검증(verify) (docs/design.md §6.7, §7.2)
+# gonlith 명령줄: 데이터 폴더 초기화(init)와 로그 전체 재검증(verify) (docs/design.md §12.2, §13)
 import json
 import sys
 
@@ -18,17 +18,16 @@ def _open_store():
 
 @app.command()
 def init():
-    """Create the log and print the recovery key once."""
+    """Create the log (normally done automatically on first run)."""
     store = _open_store()
     try:
-        recovery = store.initialize()
+        origin = store.initialize()
     except StoreError as error:
         typer.echo(f"error: {error}", err=True)
         raise typer.Exit(1) from error
     finally:
         store.close()
-    typer.echo("Recovery key (shown once, not stored; write it down and keep it offline):", err=True)
-    typer.echo(recovery)
+    typer.echo(f"initialized {origin}")
 
 
 @app.command()

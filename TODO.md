@@ -14,12 +14,11 @@
 
 - [x] 이름(Gonlith)·라이선스(Apache-2.0)·공개 저장소 생성 · GitHub
 - [x] 저장소 받기, 프로젝트 규칙(AGENTS·CLAUDE·GEMINI)과 할 일 목록 추가
-- [x] 경쟁 프로젝트 내부 기능 재확인 (`docs/research.md` §1) · mem0, Hindsight, cognee, graphiti, basic-memory, mnemo, kibisis, world-model-mcp
-- [x] 설계안 작성: 목적·차별점·위협 모델·구조·사용성 (`docs/design.md`)
+- [x] 경쟁 프로젝트 내부 기능 재확인 (`docs/research.md` §1, §7) · mem0, Hindsight, cognee, graphiti, basic-memory, mcp-memory-service
+- [x] 설계 3판(보안 중심) 작성·재검토 2회, 보호 모드 초안으로 보관 (`docs/protection-mode.md`)
+- [x] 설계 4판: 편한 범용 기억·지식 저장소 + 쉬운 관리 중심으로 전환 (`docs/design.md`)
 - [x] 규칙에 문서 경로 표 추가 (`AGENTS.md` Project Documents)
-- [x] 설계 독립 재검토 1차 반영 (`docs/decisions.md` 재검토 반영)
-- [x] 설계 2차 일관성 검토 반영 (`docs/design.md` 3판)
-- [x] 구현 전 체크포인트: 저장·서명·MCP·화면 기술 선택 (`docs/design.md` §12) · mcp, cryptography, webauthn, starlette, kiwipiepy, sqlite-vec
+- [x] 구현 전 체크포인트: 저장·MCP·화면·수집 기술 선택 (`docs/design.md` §15) · mcp, markitdown, pypdf, trafilatura, watchfiles, kiwipiepy
 
 ## S0 개발 환경
 
@@ -27,43 +26,45 @@
 - [x] gitleaks pre-commit 훅 · gitleaks
 - [x] 시작 훅 검사 이식 · gon-nexus startup_hooks.py
 
-## S1 기록 계층 (`docs/design.md` §6, §7)
+## S1 기록 계층 (`docs/design.md` §13)
 
 - [x] RFC 6962 Merkle 루트 계산과 공인 벡터 시험 · transparency-dev/merkle, hypothesis
-- [x] 데이터 형식 규격 1차 (`docs/format.md`: 항목·엄격 판독·genesis·체크포인트) · c2sp.org/tlog-checkpoint
-- [x] init(복구 키·genesis)·추가 전용 로그·내용 분리 저장 · sqlite3, cryptography
-- [x] 전체·증분 재생 검증 상태와 verify CLI · typer
-- [x] 변조 시나리오 시험(해시 체인 기준선 대비) + 변이 시험 · pytest
-- [x] 여러 프로세스 동시 쓰기 시험 (`docs/decisions.md` V3)
-- [x] 재생 비용 측정 1만·10만 건 (`docs/measurements/`)
+- [x] 데이터 형식 규격 1차 (`docs/format.md`)
+- [x] genesis·추가 전용 로그·내용 분리 저장 · sqlite3
+- [x] 전체·증분 재생 검증과 verify CLI · typer
+- [x] 변조 시나리오 시험 + 변이 시험
+- [x] 여러 프로세스 동시 쓰기 시험 (V3)
+- [x] 재생 비용 측정 (`docs/measurements/s1-record-layer.md`)
+- [x] genesis 키 선택화(4판), 복구 키 출력 제거
 
-## S2 MCP 서버 (D3·D8 대기)
+## S2 MCP 핵심 (`docs/design.md` §11)
 
-- [ ] remember·recall·forget 도구, 텍스트 꼬리표·무작위 구획, 상태 리소스 · mcp
+- [ ] 첫 실행 자동 init과 serve 명령 · mcp
+- [ ] remember·search·forget 도구, 텍스트 결과·출처 꼬리표·외부 내용 무작위 구획
 - [ ] 한국어 어휘 검색 1단계 (2-gram·형태소 비교) · kiwipiepy
-- [ ] 실제 MCP 클라이언트 2종 연결 시험 (V4)
-- [ ] 종단 공격 측정 하네스와 기준선 (D8)
+- [ ] 실제 MCP 클라이언트 2종 교차 기억 시험 (V4, V13)
 - [ ] macOS 커밋 내구성 fullfsync 측정 (V10)
 
-## S3~S6 신뢰 (D2·D7 대기)
+## S3~S6 관리·연결·수집
 
-- [ ] S3 암호 키 파일(Argon2id)·승인문 서명·변경 서명·등급 세 축 · cryptography
-- [ ] S4 외부 증인 기록·대조 (V6)
-- [ ] S5 키 권한·철회·복구 키 서명
-- [ ] S6 gonlith taint·gate 명령과 Claude Code 훅 예시 (V8, V9)
+- [ ] S3 관리 화면 1차: 검색·보기·편집·휴지통·이력·되돌리기·AI가 아는 나 · starlette, uvicorn
+- [ ] S3a Markdown 거울 폴더 (`docs/design.md` §7.4)
+- [ ] S4 setup 마법사·doctor·클라이언트 자동 연결 (V4)
+- [ ] S5 문서 수집 1차: 끌어다 놓기·add·ingest, md/txt/pdf/docx/웹 (V11) · markitdown, pypdf, trafilatura
+- [ ] S6 감시 폴더·재수집·백그라운드 담당 · watchfiles
 
 ## S7 이후
 
-- [ ] S7 웹 화면 상태·승인함·감사 (V7) · starlette, uvicorn
-- [ ] S8 패스키 승인 (V1) · webauthn
-- [ ] S9 setup 마법사·doctor·기존 기억 가져오기 (V4)
-- [ ] S10 한국어 검색 평가셋·측정, 선택적 임베딩 · fastembed, model2vec, sqlite-vec
-- [ ] S11 시점 질의·충돌 후보
-- [ ] S12 진짜 삭제
-- [ ] S13 내보내기와 별도 검증기 (포함·일관성 증명)
-- [ ] 공개 체크리스트: PyPI·MCPB·README·호환표 (D5 이후, V5)
+- [ ] S7 한국어·하이브리드 검색 측정, 임베딩 선택 (D6) · fastembed, model2vec, sqlite-vec
+- [ ] S8 정리 제안 사람 처리: 중복·충돌·오래됨·미분류
+- [ ] S9 정리 AI 처리자(로컬·연결된 AI), 자동 적용, 일괄 되돌리기 (V12)
+- [ ] S10 공간 공개 범위, 기존 기억 가져오기
+- [ ] S11 진짜 삭제·내보내기
+- [ ] S12 보호 모드 (선택, `docs/protection-mode.md`) · cryptography, webauthn
+- [ ] 릴리스 체크리스트: PyPI·MCPB·설치 스크립트·README·호환표·형식 판 1 고정 (D4, V5)
 
 ## 사용자 확인
 
-- [ ] 회사 겸업·직무발명 규정 확인 (`docs/decisions.md` D5)
-- [ ] 결정 D1~D4, D6~D8 답변 (`docs/decisions.md`)
+- [x] 회사 겸업·직무발명 규정 확인 (`docs/decisions.md` D5, 사용자 판단으로 종료)
+- [x] 결정 D10, D11 답변
+- [x] 결정 D4 첫 릴리스 범위 답변 (`docs/decisions.md`)

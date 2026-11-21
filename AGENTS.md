@@ -50,6 +50,8 @@ Read these before any design or implementation work, and keep them current. Path
 | `docs/design.md` | Canonical design. If code and this file disagree, fix the document first, then the code |
 | `docs/format.md` | Byte-level data and signature format that independent verifiers implement |
 | `docs/configuration.md` | Every configurable value, its default, and its source |
+| `docs/protection-mode.md` | Archived draft of the optional protection mode (design rev 3); not the canonical design |
+| `docs/measurements/` | Reproduced measurement records per stage |
 | `docs/research.md` | Evidence behind design choices: sources, versions, dates, local measurements |
 | `docs/decisions.md` | Confirmed decisions and the list of decisions waiting for the user. Do not implement anything blocked by a pending decision |
 

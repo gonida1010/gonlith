@@ -1,10 +1,7 @@
 # 저장소 init·추가·내용 분리와 재생 검증기가 변조 시나리오를 검출하는지 확인하는 시험 (docs/design.md §6, §7.2)
-import base64
 import sqlite3
 
 import pytest
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from typer.testing import CliRunner
 
 from conftest import remember
@@ -27,32 +24,13 @@ def filled(store, count=4):
     return replay(store)
 
 
-def test_initialize_once_and_recovery_key_matches_genesis(home, store):
+def test_initialize_once_without_keys_or_side_files(home, store):
     with pytest.raises(StoreError):
         store.initialize()
     state = replay(store)
     assert state.ok and state.size == 1
     assert state.origin.startswith(entries.ORIGIN_PREFIX)
-    key = state.keys[0]
-    assert key["rights"] == ["key"]
     assert sorted(path.name for path in home.iterdir() if not path.name.startswith("gonlith.db")) == []
-
-
-def test_recovery_key_text_reproduces_public_key(home, monkeypatch):
-    from gonlith.config import load_settings
-    from gonlith.store import Store
-
-    fresh = Store.open(home / "other", load_settings(home))
-    text = fresh.initialize()
-    state = replay(fresh)
-    fresh.close()
-    prefix, kind, name, key_id, data = text.split("+", 4)
-    raw = base64.b64decode(data)
-    public = Ed25519PrivateKey.from_private_bytes(raw[1:]).public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
-    assert (prefix, kind, raw[:1]) == ("PRIVATE", "KEY", entries.ED25519_NOTE_TYPE)
-    assert name == state.keys[0]["name"]
-    assert base64.b64encode(public).decode() == state.keys[0]["public_key"]
-    assert key_id == entries.note_key_id(name, public).hex()
 
 
 def test_append_and_read_back(store):
@@ -267,7 +245,7 @@ def test_extend_falls_back_to_full_replay_when_tail_changed(home, store):
 def test_cli_init_and_verify(home):
     runner = CliRunner()
     created = runner.invoke(app, ["init"])
-    assert created.exit_code == 0 and created.stdout.startswith("PRIVATE+KEY+gonlith.invalid/")
+    assert created.exit_code == 0 and created.stdout.startswith("initialized gonlith.invalid/")
     again = runner.invoke(app, ["init"])
     assert again.exit_code == 1
     checked = runner.invoke(app, ["verify", "--json"])

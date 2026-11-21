@@ -1,17 +1,14 @@
 # 항목 정규 인코딩·엄격 판독·PAE 봉투·종류별 필드 검증 규칙을 정상·위반 사례로 확인하는 시험 (docs/format.md §2–§3)
-import base64
-
 import pytest
 
 from gonlith import entries
 from gonlith.entries import EntryError
 
 ORIGIN = entries.ORIGIN_PREFIX + "0" * 32
-PUBLIC_KEY = bytes(range(32))
 
 
 def genesis():
-    return entries.genesis_body(ORIGIN, PUBLIC_KEY, "2026-11-20T00:00:00.000000Z")
+    return entries.genesis_body(ORIGIN, "2026-11-20T00:00:00.000000Z")
 
 
 def memory(**overrides):
@@ -88,14 +85,10 @@ def test_valid_genesis_and_memory_pass():
     "mutate",
     [
         lambda b: b.update(origin="example.com/log"),
+        lambda b: b.update(origin=entries.ORIGIN_PREFIX + "0" * 31),
         lambda b: b.update(created_at="2026-11-20T00:00:00Z"),
         lambda b: b.update(keys=[]),
-        lambda b: b["keys"][0].update(rights=["key", "approve"]),
-        lambda b: b["keys"][0].update(type="webauthn"),
-        lambda b: b["keys"][0].update(name="other/recovery"),
-        lambda b: b["keys"][0].update(public_key=base64.b64encode(bytes(31)).decode()),
-        lambda b: b["keys"].append(dict(b["keys"][0])),
-        lambda b: b.update(extra=1),
+        lambda b: b.pop("created_at"),
     ],
 )
 def test_invalid_genesis_is_rejected(mutate):
@@ -141,7 +134,3 @@ def test_genesis_only_at_position_zero():
     with pytest.raises(EntryError):
         entries.validate(disguised, 0)
 
-
-def test_non_canonical_base64_is_rejected():
-    with pytest.raises(EntryError):
-        entries.decode_b64("AB==")

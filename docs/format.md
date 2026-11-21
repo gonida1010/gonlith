@@ -1,7 +1,7 @@
 # Gonlith 데이터 형식 규격
 
 > 설계 정본: [`docs/design.md`](design.md) §6·§7. 이 문서는 다른 구현이 Gonlith 로그를 바이트 단위로 같게 읽고 검증할 수 있게 하는 규격이다.
-> **상태:** 1차 (S1 범위). `genesis`·`memory` 항목, 엄격 판독, 체크포인트를 정의한다. 승인문·키·변경 항목은 S3·S5에서 이 문서에 추가한다. **공개 전까지 형식 판 1은 확정되지 않으며, 그 전에 만든 로그는 버린다** (`docs/design.md` §6.7).
+> **상태:** 1차 (S1 범위, 설계 4판 반영). `genesis`·`memory` 항목, 엄격 판독, 체크포인트를 정의한다. `note`·`document`·`revise`·`archive`·`delete`·합치기 항목은 각 단계에서 추가한다. **공개 전까지 형식 판 1은 확정되지 않으며, 그 전에 만든 로그는 버린다** (`docs/design.md` §6.7).
 > 규범 용어 MUST/SHOULD는 RFC 2119·8174 뜻으로 쓴다.
 
 ## 1. 로그
@@ -69,25 +69,9 @@
 | `kind` | `"genesis"` | |
 | `origin` | 문자열 | 로그 원점 이름: `gonlith.invalid/` + 무작위 16바이트의 소문자 16진수 32자. `.invalid`는 RFC 2606 예약 최상위 도메인이라 실제 도메인과 겹치지 않는다 |
 | `created_at` | `timestamp` | 참고값 |
-| `keys` | 배열 | 최초 신뢰 키 목록. 각 원소는 §3.1.1 |
 
-#### 3.1.1 키 원소
-
-| 필드 | 형식 | 뜻 |
-| :--- | :--- | :--- |
-| `name` | 문자열 | signed-note 키 이름. `<origin>/<역할 이름>` (공백·`+` 금지) |
-| `type` | `"ed25519"` | 판 1의 genesis에는 Ed25519만 허용 |
-| `public_key` | `b64` | 32바이트 Ed25519 공개키 |
-| `rights` | 문자열 배열 | genesis 복구 키는 정확히 `["key"]` (`docs/design.md` §6.8: 키 관리만) |
-
-* 키 ID는 C2SP signed-note 정의를 따른다: `SHA-256(name ‖ 0x0A ‖ 0x01 ‖ public_key)[:4]`
-* `keys`는 1개 이상이어야 하고, 같은 `name`이 중복되면 안 된다.
-
-#### 3.1.2 복구 키 표기
-
-* `gonlith init`은 복구 개인키를 한 번만 출력하고 저장하지 않는다.
-* 출력 형식은 Go `golang.org/x/mod/sumdb/note`의 개인키 표기 `PRIVATE+KEY+<name>+<키 ID 8자 16진수>+<b64(0x01 ‖ 32바이트 Ed25519 시드)>`를 따른다.
-* 마지막 base64 필드에는 `+`가 들어갈 수 있다. 그래서 파서는 앞의 네 `+`로만 나눈다(MUST).
+* 기본 모드의 genesis에는 키가 없다 (`docs/design.md` §13.3). 보호 모드의 키는 그 단계에서 별도 항목 종류로 정의한다 (`docs/protection-mode.md`).
+* 첫 실행 때 서버가 자동으로 genesis를 만든다.
 
 ### 3.2 `memory`
 
@@ -100,7 +84,7 @@
 | `valid_from` | `instant` 또는 `null` | 주장값 |
 | `valid_to` | `instant` 또는 `null` | 주장값. 둘 다 있으면 같은 형식(`YYYY-MM-DD`끼리 또는 `timestamp`끼리)이어야 하고 `valid_from` < `valid_to` |
 | `recorded_at` | `timestamp` | 참고값. 순서의 정본은 위치 |
-| `writer` | `"agent"` 또는 `"human"` | `human`은 서명된 승인문이 덮을 때만 인정 (`docs/design.md` §6.1) |
+| `writer` | `"agent"` 또는 `"human"` | 쓴 쪽이 밝힌 값 |
 | `client` | 문자열 또는 `null` | 클라이언트가 밝힌 이름. 검증되지 않음 |
 | `session` | 비어 있지 않은 문자열 | 서버가 발급한 세션 식별자 |
 | `source` | `"conversation"`·`"tool_output"`·`"web"`·`"file"`·`"user_typed"`·`"unknown"` 중 하나 | 쓰는 쪽이 밝힌 값 |
@@ -111,7 +95,7 @@
 * 내용은 로그 밖 `contents` 저장소에 위치별로 `salt`와 함께 둔다.
 * `salt`는 16바이트 무작위 값이다(NIST SP 800-132 §5.1의 최소 128비트).
 * 내용은 비어 있지 않은 UTF-8 바이트이며, 받은 그대로 저장한다(정규화하지 않음).
-* 검증기는 `SHA-256(salt ‖ 내용)`이 항목의 `content_hash`와 같은지 확인한다. 내용이 없으면 서명된 삭제 적용(S12에서 정의)이 있을 때만 허용하고, 없으면 그 기억은 `broken`이다.
+* 검증기는 `SHA-256(salt ‖ 내용)`이 항목의 `content_hash`와 같은지 확인한다. 내용이 없으면 `delete` 항목(S11에서 정의)이 있을 때만 허용하고, 없으면 그 기억은 `broken`이다.
 
 ## 5. 체크포인트
 
@@ -125,10 +109,8 @@ C2SP [tlog-checkpoint](https://c2sp.org/tlog-checkpoint) 노트 본문:
 
 * 각 줄은 `0x0A`로 끝난다.
 * 서명되지 않은 체크포인트는 `gonlith verify`가 출력하는 현재 상태 요약이다.
-* 승인문은 이 세 줄 뒤에 **확장 줄**로 동작 목록을 붙인 signed-note다(S3에서 정의).
-  * 규격은 확장 줄을 "권장하지 않음"으로 두지만 허용한다.
-  * 동작 목록은 체크포인트와 반드시 함께 서명되어야 하고, Ed25519 note 서명은 확장 줄을 포함한 본문 전체를 서명한다. 그래서 이 방식을 택했다.
-  * 확장 줄을 서명하지 않는 서명 방식(ML-DSA-44 공동 서명)은 승인 서명으로 쓰지 않는다.
+* 기본 모드에서 체크포인트는 무결성 경고용 기준점이다(데이터 폴더에 저장, `docs/design.md` §13.2).
+* 보호 모드의 서명 승인문은 이 세 줄 뒤에 확장 줄로 동작 목록을 붙인 signed-note로 정의할 예정이다(`docs/protection-mode.md` §6.5).
 
 ## 6. SQLite 저장 (참고 구현)
 

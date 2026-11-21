@@ -6,13 +6,12 @@ build-backend = "uv_build"
 [project]
 name = "gonlith"
 version = "0.0.1"
-description = "Local MCP memory for AI agents that is human-signed, verified on every read, and rollback-evident"
+description = "Local memory and knowledge store shared by every AI client over MCP, with easy management and undo"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
-    "cryptography>=50.0.2",
     "platformdirs>=4.14",
     "typer>=0.29",
 ]

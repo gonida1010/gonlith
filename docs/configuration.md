@@ -1,7 +1,7 @@
 # Gonlith 설정값과 출처
 
 > 설계 정본: [`docs/design.md`](design.md) §8.8 — 출처 없는 상수는 두지 않는다. 기본값은 `src/gonlith/defaults.toml`, 사용자 덮어쓰기는 데이터 폴더의 `config.toml`이다.
-> **설정 파일은 신뢰 판단에 쓰지 않는다** (`docs/design.md` §6.7, §6.8). 키·권한·KDF 매개변수·패스키 origin은 서명된 로그나 키 파일 머리에 있다.
+> 보호 모드(선택)의 키·권한은 설정 파일이 아니라 서명된 로그에 둔다 (`docs/protection-mode.md` §6.8).
 
 | 키 | 기본값 | 출처·근거 | 재검토 |
 | :--- | :--- | :--- | :--- |

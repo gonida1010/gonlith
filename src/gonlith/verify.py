@@ -15,7 +15,6 @@ class Problem:
 @dataclass
 class VerifiedLog:
     origin: str | None = None
-    keys: list = field(default_factory=list)
     leaf_hashes: list = field(default_factory=list)
     frontier: Frontier = field(default_factory=Frontier)
     memories: dict = field(default_factory=dict)
@@ -72,7 +71,7 @@ def _apply(state, store, position, entry):
         _fail(state, position, f"invalid entry: {error}")
         return
     if body["kind"] == "genesis":
-        state.origin, state.keys = body["origin"], body["keys"]
+        state.origin = body["origin"]
         return
     for target in body["derived_from"]:
         if target not in state.memories:

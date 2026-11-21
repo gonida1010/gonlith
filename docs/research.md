@@ -110,3 +110,37 @@ Zep/Graphiti ([2501.13956](https://arxiv.org/abs/2501.13956)): 간선마다 유�
 | 비밀값 검사 | gitleaks 작업 트리 검사 결과 유출 0건 | 확인: 로컬 실측 |
 | Merkle 구현 근거 | pymerkle 7.0.0은 GPLv3+ → Apache-2.0 패키지 의존성으로 쓰지 않음. 시험 벡터는 transparency-dev/merkle `testonly/constants.go` (Apache-2.0, 커밋 75a6539d, 2026-11-19)의 잎 입력 8개·루트 9개 | 확인: PyPI 분류자, 저장소 복제 |
 | C2SP tlog-checkpoint | 본문 3줄(원점·크기·base64 루트), 이후 확장 줄은 선택이며 "권장하지 않음"(감사 불가, 일부 서명 방식이 서명 안 함). Ed25519 note 서명은 본문 전체를 서명 | 확인: [C2SP tlog-checkpoint.md](https://github.com/C2SP/C2SP/blob/main/tlog-checkpoint.md) |
+
+## 7. 관리·수집 기능 경쟁 조사 (2026-11-21)
+
+각 README·문서·코드에서 확인했다. 확인하지 못한 칸은 "미확인"이다.
+
+| 프로젝트 (라이선스, 최근) | 설치·로컬 모델 | 관리 화면 | 수집 | 자동 정리 | 여러 클라이언트 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| mem0 OSS (Apache-2.0, 2.2.1, 2026-09-25) | 라이브러리는 pip. 대시보드는 Docker+Postgres+`OPENAI_API_KEY`. Ollama 설정 가능 | 사용자별 탐색·삭제, LLM 설정. 편집·병합·되돌리기 미기재 | 텍스트·대화, 이미지(비전 모델) | 2026 알고리즘은 "ADD-only", 모순이 남음 | **공식 MCP는 호스팅 전용.** OpenMemory는 2026-07-29(#6530) 제거 |
+| basic-memory (AGPL-3.0, 1.0.0, 2026-10-29) | `uv tool install`, 클라이언트 JSON 직접 편집, 로컬 FastEmbed | 로컬 GUI 없음(Obsidian·편집기). 유료 클라우드에 웹 앱·스냅샷 | Markdown만, 폴더 양방향 동기 | 자동 정리 없음 | 같은 폴더 공유로 가능 |
+| Hindsight (MIT, 1.2.3, 2026-11-19) | Docker+LLM 키 또는 pip. Ollama·LM Studio, 로컬 모델 | **가장 풍부**: 편집·무효화·문서·관찰 이력·엔티티·감사·zip 내보내기 | PDF·DOCX·PPTX·XLSX·이미지·txt/md(markitdown), Obsidian 단방향 `--watch`. URL 수집 미발견 | LLM 배경 통합, 거의 중복·모순 자동 조정(이력 유지), 사람 확인 미발견 | 서버 1개, 은행별 MCP 엔드포인트 |
+| Cognee (Apache-2.0, 1.6.10, 2026-11-18) | uv, 키 없이 로컬 GLiNER. UI는 Node, MCP는 Docker·소스 | 데이터셋·그래프·검색·활동 화면. 편집·병합·되돌리기 미기재 | 텍스트·CSV·PDF·이미지·오디오·비디오·코드, 웹 스크레이퍼, Drive·Gmail | 선택형 LLM 모순 검사(간선만 추가, 해결 안 함) | HTTP/SSE |
+| Letta (Apache-2.0, letta-code 0.34.68) | npm/uv·데스크톱 앱, 클라우드 기본 | 메모리 블록, git 이력 | 문서 저장소 아님 | 에이전트가 스스로 재작성 | 공유 MCP 서버 아님 |
+| Khoj (AGPL-3.0, 안정판 1.42.10 2025-07) | pip·Docker, Ollama | 채팅·파일 관리 웹 앱 | PDF·MD·org·DOCX·이미지·Notion, 폴더 동기 | 미기재 | MCP 클라이언트일 뿐 서버 아님 |
+| mcp-memory-service (Apache-2.0, 13.0.0, 2026-11-20) | pip, JSON 직접 편집, 로컬 ONNX | 탐색·편집·삭제·일괄 삭제·완전 중복 정리·JSON 내보내기. 병합·충돌·되돌리기 미기재 | PDF·DOCX·PPTX·TXT·MD 업로드, 감시 없음 | 주기적 통합, 규칙으로 옛 기억 대체 | HTTP 모드 |
+| LongMemory (옛 CaviraOSS OpenMemory, Apache-2.0, npm 1.3.3 2026-08-31) | npm·Docker, Ollama | Next.js 대시보드: 탐색·수집·검색·타임라인·감쇠 | 로컬 파일·Markdown·웹·피드·클라우드 문서(목록 기준) | 검색 시점 대체·모순 검사 | stdio·HTTP |
+
+* 확인 못 한 것: LongMemory 저장소 릴리스 날짜(GitHub API 제한으로 npm 날짜 사용), Cognee·Khoj 화면의 편집·병합 기능(페이지 이름·문서만 봄).
+* 결론(판단): 사람 확인 정리, 사용자용 되돌리기, 일반인 설치, 파일+URL+감시 폴더 조합이 비어 있다. `docs/design.md` §3.
+
+## 8. 수집 라이브러리 확인 (PyPI JSON API, 2026-11-21)
+
+| 패키지 | 버전 (날짜) | 라이선스 | 판정 |
+| :--- | :--- | :--- | :--- |
+| markitdown | 0.1.9 (2026-10-21) | MIT | 후보 (Office·PDF→Markdown) |
+| docling | 2.151.1 (2026-11-19) | MIT | 선택 기능 후보 (무거움, OCR·표) |
+| pypdf | 7.1.1 (2026-11-18) | BSD-3-Clause | 후보 (PDF 텍스트) |
+| trafilatura | 2.3.1 (2026-10-06) | Apache-2.0 | 후보 (웹 본문) |
+| watchfiles | 1.3.0 (2026-09-21) | MIT | 후보 (폴더 감시) |
+| watchdog | 7.1.0 (2026-11-05) | Apache-2.0 | 대안 |
+| chonkie / semchunk | 1.7.0 (2026-07-07) / 4.1.1 (2026-06-13) | MIT | 조각 나누기 대안 (제목 기준 직접 분할과 S5에서 비교) |
+| pymupdf | 2.1 (2026-11-02) | **AGPL** | 제외 |
+| html2text | 2025.4.15 | **GPL-3.0+**, 2026 릴리스 없음 | 제외 |
+| unstructured | 0.27.37 (2026-11-06) | Apache-2.0 | 제외 (`requires_python <3.14`) |
+| httpx | 0.28.1 (2024-12-06) | BSD | 2026 릴리스 없음 → 직접 의존 금지, `mcp`의 간접 의존성으로만 |
