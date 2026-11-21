@@ -24,6 +24,7 @@ def memory(**overrides):
         session="s",
         source="conversation",
         derived_from=[],
+        tags=[],
     )
     body.update(overrides)
     return body

@@ -12,9 +12,13 @@ license = "Apache-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
+    "mcp>=2.3",
     "platformdirs>=4.14",
     "typer>=0.29",
 ]
+
+[project.optional-dependencies]
+korean = ["kiwipiepy>=0.24"]
 
 [project.scripts]
 gonlith = "gonlith.cli:app"
@@ -28,6 +32,8 @@ dev = [
 [tool.uv]
 exclude-newer = "1 week"
 no-build = true
+no-binary-package = ["kiwipiepy-model"]
+build-constraint-dependencies = ["setuptools==84.2.1"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

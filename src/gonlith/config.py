@@ -7,6 +7,7 @@ from pathlib import Path
 from platformdirs import user_data_path
 
 HOME_ENV = "GONLITH_HOME"
+SPACE_ENV = "GONLITH_SPACE"
 APP_NAME = "gonlith"
 DEFAULTS_RESOURCE = "defaults.toml"
 USER_CONFIG_FILE = "config.toml"

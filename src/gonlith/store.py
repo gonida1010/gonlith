@@ -18,17 +18,19 @@ class StoreError(RuntimeError):
 
 
 class Store:
-    def __init__(self, path, busy_timeout_seconds):
+    def __init__(self, path, busy_timeout_seconds, fullfsync):
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         self.connection = sqlite3.connect(path, timeout=busy_timeout_seconds, isolation_level=None)
         self.connection.execute("PRAGMA journal_mode=WAL")
         self.connection.execute("PRAGMA secure_delete=ON")
+        self.connection.execute(f"PRAGMA fullfsync={'ON' if fullfsync else 'OFF'}")
+        self.connection.execute(f"PRAGMA checkpoint_fullfsync={'ON' if fullfsync else 'OFF'}")
         self.connection.executescript(SCHEMA)
 
     @classmethod
     def open(cls, home, settings):
         storage = settings["storage"]
-        return cls(Path(home) / storage["database_file"], storage["busy_timeout_seconds"])
+        return cls(Path(home) / storage["database_file"], storage["busy_timeout_seconds"], storage["fullfsync"])
 
     def close(self):
         self.connection.close()
@@ -57,7 +59,7 @@ class Store:
         self._transaction(work)
         return origin
 
-    def append_memory(self, content, *, space, category, valid_from, valid_to, writer, client, session, source, derived_from):
+    def append_memory(self, content, *, space, category, valid_from, valid_to, writer, client, session, source, derived_from, tags):
         if not isinstance(content, str) or content == "":
             raise StoreError("content must be a non-empty string")
         try:
@@ -77,6 +79,7 @@ class Store:
             session=session,
             source=source,
             derived_from=derived_from,
+            tags=tags,
         )
 
         def work(cursor):
@@ -92,6 +95,27 @@ class Store:
             cursor.execute(
                 "INSERT INTO contents(position, salt, content) VALUES (?, ?, ?)", (position, salt, content_bytes)
             )
+            return position
+
+        return self._transaction(work)
+
+    def append_archive(self, target, *, writer, client, session, reason):
+        body = entries.archive_body(
+            target=target,
+            recorded_at=entries.now_timestamp(),
+            writer=writer,
+            client=client,
+            session=session,
+            reason=reason,
+        )
+
+        def work(cursor):
+            position = cursor.execute("SELECT COALESCE(MAX(position) + 1, 0) FROM log").fetchone()[0]
+            entries.validate(body, position)
+            row = cursor.execute("SELECT entry FROM log WHERE position = ?", (target,)).fetchone()
+            if row is None or entries.unwrap(row[0]).get("kind") != "memory":
+                raise StoreError(f"{target} is not a memory")
+            cursor.execute("INSERT INTO log(position, entry) VALUES (?, ?)", (position, entries.wrap(body)))
             return position
 
         return self._transaction(work)

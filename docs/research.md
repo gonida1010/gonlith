@@ -144,3 +144,71 @@ Zep/Graphiti ([2501.13956](https://arxiv.org/abs/2501.13956)): 간선마다 유�
 | html2text | 2025.4.15 | **GPL-3.0+**, 2026 릴리스 없음 | 제외 |
 | unstructured | 0.27.37 (2026-11-06) | Apache-2.0 | 제외 (`requires_python <3.14`) |
 | httpx | 0.28.1 (2024-12-06) | BSD | 2026 릴리스 없음 → 직접 의존 금지, `mcp`의 간접 의존성으로만 |
+
+## 9. 평가용 공개 데이터셋 (2026-11-21, HF API로 날짜·크기 확인)
+
+평가에만 쓰고 재배포하지 않는다. 받는 목록과 고정 커밋은 `eval/datasets.toml`, 파일 SHA-256은 `eval/datasets.lock.json`, 캐시는 `eval/.cache/`(git 제외)에 둔다. 2026년에 공개되었거나 2026년에 갱신된 데이터만 쓴다(AGENTS.md).
+
+**받은 것 (텍스트 6종, 27 MB):**
+
+| 용도 | 데이터셋 | HF 최초 게시 / 갱신 | 원본 | 라이선스 | 받은 파일 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 장기 대화 기억 QA (한국어) | [NAMJOON/longmemeval-oracle-ko](https://huggingface.co/datasets/NAMJOON/longmemeval-oracle-ko) | 2026-09-27 / 2026-09-27 | LongMemEval 2024-10 (arXiv 2410.10813) 기계 번역 | MIT | `korean_only.jsonl` 16.1 MB. oracle 분할이라 방해 세션 없음 |
+| 한국어 위키 검색 | [nlpai-lab/miracl-multilingual-triplets](https://huggingface.co/datasets/nlpai-lab/miracl-multilingual-triplets) | 2026-07-16 / 2026-07-16 | MIRACL | Apache-2.0 | `miracl_ko_triplet.parquet` 1.8 MB |
+| 한국어 문단 검색 | [mteb/belebele](https://huggingface.co/datasets/mteb/belebele) | 2026-02-26 / 2026-02-26 | Belebele (FLORES 문단) | CC-BY-SA-4.0 | `kor_Hang.jsonl` 1.5 MB (문단 488·질문 900) |
+| 한국어 다단계 문서 검색 | [whooray/Ko-StrategyQA](https://huggingface.co/datasets/whooray/Ko-StrategyQA) | 2026-02-21 / 2026-02-21 | StrategyQA 2021 | 카드에 없음 → 내부 평가만 | 7.6 MB (문서 9,251·dev 질의 592) |
+| 기억 모순·갱신 판별 | [eskora/memory-contradiction-pairs-hard](https://huggingface.co/datasets/eskora/memory-contradiction-pairs-hard) | 2026-11-11 / 2026-11-11 | 개인 제작, 검증 이력 없음 | CC-BY-4.0 | test·valid 0.16 MB. S8 전에 표본 품질 확인 |
+| 한국어 의역 판별 | [mteb/PawsXPairClassification](https://huggingface.co/datasets/mteb/PawsXPairClassification) | 2025-06-19 / 2026-02-24 | PAWS-X 2019-08 (arXiv 1908.11828) | Google 약관상 자유 사용 (카드: other) | ko test·validation 0.7 MB |
+
+**음성 (S5b 때 받음, 사용자 확인 후):**
+
+| 데이터셋 | HF 최초 게시 / 갱신 | 원본 | 라이선스 | 한국어 크기 |
+| :--- | :--- | :--- | :--- | :--- |
+| [google/fleurs](https://huggingface.co/datasets/google/fleurs) ko_kr (낭독) | 2022-04-19 / 2026-05-15 | 2022-05 (arXiv 2205.12446) | CC-BY-4.0 | 1.76 GB |
+| [MagicHub/korean-conversational-speech-corpus](https://huggingface.co/datasets/MagicHub/korean-conversational-speech-corpus) (대화) | 2026-06-09 / 2026-06-15 | 원본 공개일 카드에 없음 | 학술 연구 전용 | 619 MB |
+| [google/svq](https://huggingface.co/datasets/google/svq) ko_kr (짧은 음성 질문, 검색 연결) | 2025-05-12 / 2026-09-24 | — | CC-BY-4.0 | 깨끗한 음성만 167 MB, 잡음 포함 전체 865 MB |
+
+**2026 기준으로 제외 (확인):**
+
+| 데이터 | 마지막 갱신 | 대신 쓰는 것 |
+| :--- | :--- | :--- |
+| mteb/AutoRAGRetrieval | 2025-05 | Belebele·MIRACL·Ko-StrategyQA |
+| allganize/RAG-Evaluation-Dataset-KO (PDF) | 2024-11 | 2026 한국어 PDF 질의 데이터를 찾지 못함. S5에서 공개 한국어 PDF(공공누리 1유형 등)로 직접 만든다 |
+| PAWS-X 원본 저장소 | 2024-01 | mteb 2026 사본 |
+| LoCoMo | 2024-08 (CC BY-NC) | LongMemEval-ko |
+| MemoryBank | 2023-05 | LongMemEval-ko |
+| Zeroth-Korean | 2022/2024 | FLEURS·MagicHub |
+| KsponSpeech (AI Hub) | 2019-05 | 사용자가 직접 받으면 로컬 평가만 |
+| xiaowu0162/longmemeval-cleaned (영어 원본) | HF 2025-09 (GitHub 2026-05) | 필요 시 영어 oracle 15 MB만. M 분할은 2.7 GB |
+
+**조사 과정에서 바로잡은 것:**
+* 처음 조사에서는 "평가 도구 mteb가 2026-11에 갱신됐으니 2026 규칙을 충족한다"고 판단했다. 이는 데이터 자체가 아닌 도구 기준이라 잘못이다. 데이터 갱신일로 다시 걸렀다.
+* 처음 크기 보고에서 FLEURS ko를 "수백 MB"로 적었다. 실제는 1.76 GB다.
+
+## 10. 음성 처리 구성 요소 (2026-11-21)
+
+| 구분 | 후보 | 라이선스 | 날짜 | 한국어 | 비고 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 음성 인식 (기본 후보) | whisper-large-v3-turbo + [whisper.cpp](https://github.com/ggml-org/whisper.cpp) v1.9.5 | MIT | 가중치 2024-10, 실행기 2026-10-06 | 지원 (카드에 한국어 수치 없음) | Metal·CUDA·CPU, 809M |
+| 음성 인식 (비교 후보) | [Qwen3-ASR-1.7B/0.6B](https://huggingface.co/Qwen/Qwen3-ASR-1.7B) | Apache-2.0 | 2026-01-28 | 지원 (한국어 수치 없음) | MLX·GGUF 이식본 |
+| 음성 인식 (무거운 선택) | [VibeVoice-ASR](https://huggingface.co/microsoft/VibeVoice-ASR) | MIT | 2026-01 | 태그만 | 8.7B, 화자 구분 내장, 48 GB에 들어감 (추정) |
+| 참고 수치 | nemotron-3.5-asr-streaming-0.6b | OpenMDW-1.1 | 2026-05 | FLEURS ko CER 7.12 (저자 보고) | CUDA 중심 |
+| 화자 구분 | [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) | Apache-2.0 | 2026-11 | — | 토큰 불필요, 3개 OS |
+| 화자 구분 (대안) | pyannote.audio 4.1.1 + community-1 | MIT 코드 / CC-BY-4.0 가중치 | 2026-11-19 | — | HF 토큰·약관 동의 필요(게이트) |
+| 음성 구간 검출 | [silero-vad](https://github.com/snakers4/silero-vad) 6.2.3 | MIT | 2026-09 | — | TEN VAD는 경쟁 금지 조건이 붙어 제외 |
+
+* 제외 (확인):
+  * Parakeet-v3·Canary-1b-v2: 한국어 없음
+  * Kotoba: 일본어 전용
+  * SenseVoiceSmall: 자체 라이선스
+  * mlx-whisper: 2025-08 이후 정체
+* **MCP와 음성 (확인, [schema 2026-07-28](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/schema/2026-07-28/schema.ts)):**
+  * `AudioContent`는 도구 결과·프롬프트 메시지 같은 **출력**에만 있다. 도구 **입력**은 JSON 인자라 음성은 base64 문자열이나 파일 경로로만 넘길 수 있다.
+  * 대화 음성이나 전체 대화록을 MCP 서버에 넘기는 클라이언트는 찾지 못했다 (추정).
+  * 음성 모드에서 MCP 도구 호출은 Claude(2026-07)와 ChatGPT(2026-09)에 생겼다(2차 출처). 다만 사용자 제보로는 사용자 정의 MCP 도구가 실패한 사례가 있다.
+* **판단:** 음성은 이 순서로 들어온다:
+  1. 녹음 파일 가져오기
+  2. 대본·대화 내보내기 파일 가져오기
+  3. 음성 모드 AI가 대화 중 텍스트로 `remember` 호출
+
+  실시간 음성 연결은 지금 규격으로는 없다.

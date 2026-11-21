@@ -23,6 +23,7 @@ def _writer(home, worker):
             session=f"session-{worker}",
             source="conversation",
             derived_from=[],
+            tags=[],
         )
     store.close()
 

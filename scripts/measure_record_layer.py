@@ -24,6 +24,7 @@ FIELDS = dict(
     session="measure",
     source="conversation",
     derived_from=[],
+    tags=[],
 )
 
 

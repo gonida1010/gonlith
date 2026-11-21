@@ -1,10 +1,12 @@
-# gonlith 명령줄: 데이터 폴더 초기화(init)와 로그 전체 재검증(verify) (docs/design.md §12.2, §13)
+# gonlith 명령줄: MCP 서버 실행(serve), 데이터 폴더 초기화(init), 로그 전체 재검증(verify) (docs/design.md §12.2, §13)
 import json
+import os
 import sys
+import uuid
 
 import typer
 
-from gonlith.config import data_home, load_settings
+from gonlith.config import SPACE_ENV, data_home, load_settings
 from gonlith.store import Store, StoreError
 from gonlith.verify import replay
 
@@ -14,6 +16,21 @@ app = typer.Typer(no_args_is_help=True, add_completion=False)
 def _open_store():
     home = data_home()
     return Store.open(home, load_settings(home))
+
+
+@app.command()
+def serve():
+    """Run the MCP server over stdio (used by MCP clients)."""
+    from gonlith.server import build_server
+    from gonlith.service import MemoryService
+
+    home = data_home()
+    settings = load_settings(home)
+    service = MemoryService(home, settings, session=uuid.uuid4().hex, default_space=os.environ.get(SPACE_ENV))
+    try:
+        build_server(service, settings).run("stdio")
+    finally:
+        service.close()
 
 
 @app.command()

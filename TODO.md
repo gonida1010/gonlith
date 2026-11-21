@@ -39,11 +39,12 @@
 
 ## S2 MCP 핵심 (`docs/design.md` §11)
 
-- [ ] 첫 실행 자동 init과 serve 명령 · mcp
-- [ ] remember·search·forget 도구, 텍스트 결과·출처 꼬리표·외부 내용 무작위 구획
-- [ ] 한국어 어휘 검색 1단계 (2-gram·형태소 비교) · kiwipiepy
-- [ ] 실제 MCP 클라이언트 2종 교차 기억 시험 (V4, V13)
-- [ ] macOS 커밋 내구성 fullfsync 측정 (V10)
+- [x] 첫 실행 자동 init과 serve 명령 · mcp
+- [x] remember·search·forget 도구, 텍스트 결과·출처 꼬리표·외부 내용 무작위 구획
+- [x] 한국어 어휘 검색 1단계 (2-gram·형태소 비교, `docs/measurements/s2-mcp-core.md`) · kiwipiepy
+- [ ] 로컬 모델(Ollama) MCP 하네스로 교차 기억 시험 · ollama, mcp
+- [x] 외부 평가셋 내려받기 스크립트와 캐시 (`eval/datasets.toml`, `scripts/fetch_eval_datasets.py`)
+- [x] macOS 커밋 내구성 fullfsync 측정 (V10)
 
 ## S3~S6 관리·연결·수집
 
@@ -51,6 +52,7 @@
 - [ ] S3a Markdown 거울 폴더 (`docs/design.md` §7.4)
 - [ ] S4 setup 마법사·doctor·클라이언트 자동 연결 (V4)
 - [ ] S5 문서 수집 1차: 끌어다 놓기·add·ingest, md/txt/pdf/docx/웹 (V11) · markitdown, pypdf, trafilatura
+- [ ] S5b 음성·대본 수집: 녹음 파일 음성 인식, 대본 파일 가져오기 (D12) · whisper.cpp, silero-vad, sherpa-onnx
 - [ ] S6 감시 폴더·재수집·백그라운드 담당 · watchfiles
 
 ## S7 이후
@@ -68,3 +70,4 @@
 - [x] 회사 겸업·직무발명 규정 확인 (`docs/decisions.md` D5, 사용자 판단으로 종료)
 - [x] 결정 D10, D11 답변
 - [x] 결정 D4 첫 릴리스 범위 답변 (`docs/decisions.md`)
+- [ ] 결정 D12 음성 수집 첫 릴리스 포함 여부 (`docs/decisions.md`)

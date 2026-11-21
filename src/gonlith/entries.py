@@ -35,8 +35,11 @@ MEMORY_FIELDS = frozenset(
         "session",
         "source",
         "derived_from",
+        "tags",
     }
 )
+ARCHIVE_FIELDS = frozenset({"kind", "target", "recorded_at", "writer", "client", "session", "reason"})
+EXTERNAL_SOURCES = frozenset({"tool_output", "web", "file"})
 
 
 class EntryError(ValueError):
@@ -161,18 +164,13 @@ def _validate_valid_time(valid_from, valid_to):
 
 def _validate_memory(body, position):
     _require_fields(body, MEMORY_FIELDS)
-    for name in ("space", "category", "session"):
+    for name in ("space", "category"):
         if not _is_nonempty_text(body[name]):
             raise EntryError(f"{name} must be a non-empty string")
     if not isinstance(body["content_hash"], str) or not HEX32_PATTERN.fullmatch(body["content_hash"]):
         raise EntryError("content_hash must be 64 lowercase hex characters")
     _validate_valid_time(body["valid_from"], body["valid_to"])
-    if not _is_timestamp(body["recorded_at"]):
-        raise EntryError("invalid recorded_at")
-    if body["writer"] not in WRITERS:
-        raise EntryError("invalid writer")
-    if body["client"] is not None and not isinstance(body["client"], str):
-        raise EntryError("client must be a string or null")
+    _validate_actor(body)
     if body["source"] not in SOURCES:
         raise EntryError("invalid source")
     derived = body["derived_from"]
@@ -180,6 +178,29 @@ def _validate_memory(body, position):
         raise EntryError("derived_from must be a list of positions")
     if derived != sorted(set(derived)) or (derived and derived[-1] >= position):
         raise EntryError("derived_from must be ascending, unique, and earlier than this entry")
+    tags = body["tags"]
+    if not isinstance(tags, list) or not all(_is_nonempty_text(tag) for tag in tags) or tags != sorted(set(tags)):
+        raise EntryError("tags must be a sorted list of unique non-empty strings")
+
+
+def _validate_actor(body):
+    if not _is_timestamp(body["recorded_at"]):
+        raise EntryError("invalid recorded_at")
+    if body["writer"] not in WRITERS:
+        raise EntryError("invalid writer")
+    if body["client"] is not None and not isinstance(body["client"], str):
+        raise EntryError("client must be a string or null")
+    if not _is_nonempty_text(body["session"]):
+        raise EntryError("session must be a non-empty string")
+
+
+def _validate_archive(body, position):
+    _require_fields(body, ARCHIVE_FIELDS)
+    _validate_actor(body)
+    if not _is_position(body["target"]) or not 0 < body["target"] < position:
+        raise EntryError("archive target must be an earlier entry")
+    if body["reason"] is not None and not isinstance(body["reason"], str):
+        raise EntryError("reason must be a string or null")
 
 
 def validate(body, position):
@@ -190,6 +211,8 @@ def validate(body, position):
         _validate_genesis(body)
     elif kind == "memory":
         _validate_memory(body, position)
+    elif kind == "archive":
+        _validate_archive(body, position)
     else:
         raise EntryError(f"unknown or misplaced kind {kind!r}")
 
@@ -202,7 +225,11 @@ def genesis_body(origin, created_at):
     return {"kind": "genesis", "origin": origin, "created_at": created_at}
 
 
-def memory_body(*, space, category, digest, valid_from, valid_to, recorded_at, writer, client, session, source, derived_from):
+def origin_of(source):
+    return "external" if source in EXTERNAL_SOURCES else "own"
+
+
+def memory_body(*, space, category, digest, valid_from, valid_to, recorded_at, writer, client, session, source, derived_from, tags):
     return {
         "kind": "memory",
         "space": space,
@@ -216,4 +243,17 @@ def memory_body(*, space, category, digest, valid_from, valid_to, recorded_at, w
         "session": session,
         "source": source,
         "derived_from": list(derived_from),
+        "tags": sorted(set(tags)),
+    }
+
+
+def archive_body(*, target, recorded_at, writer, client, session, reason):
+    return {
+        "kind": "archive",
+        "target": target,
+        "recorded_at": recorded_at,
+        "writer": writer,
+        "client": client,
+        "session": session,
+        "reason": reason,
     }

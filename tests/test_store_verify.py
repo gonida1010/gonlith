@@ -161,6 +161,7 @@ def test_replay_rejects_derived_from_pointing_at_non_memory(home, store):
         session="s",
         source="conversation",
         derived_from=[0],
+        tags=[],
     )
     connection = raw_connection(home)
     connection.execute("INSERT INTO log(position, entry) VALUES (2, ?)", (entries.wrap(body),))
@@ -255,3 +256,22 @@ def test_cli_init_and_verify(home):
     connection.close()
     broken = runner.invoke(app, ["verify"])
     assert broken.exit_code == 1 and "PROBLEMS FOUND" in broken.stdout
+
+
+def test_archiving_the_same_memory_twice_is_a_structural_problem(store):
+    memory = remember(store, "두 번 버리기")
+    store.append_archive(memory, writer="agent", client="t", session="s", reason=None)
+    second = store.append_archive(memory, writer="agent", client="t", session="s", reason=None)
+    state = replay(store)
+    assert state.first_bad_position == second
+    assert state.memories[memory]["status"] == "archived"
+
+
+def test_archive_with_invalid_fields_is_rejected_before_writing(store):
+    memory = remember(store, "형식 검사")
+    size = replay(store).size
+    with pytest.raises(entries.EntryError):
+        store.append_archive(memory, writer="agent", client="t", session="s", reason=5)
+    with pytest.raises(entries.EntryError):
+        store.append_archive(memory, writer="robot", client="t", session="s", reason=None)
+    assert replay(store).size == size

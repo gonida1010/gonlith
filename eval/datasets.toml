@@ -1,0 +1,58 @@
+# 평가에 쓰는 외부 데이터셋 목록: 출처·고정 커밋·받을 파일·라이선스·용도 (받은 파일은 eval/.cache/에 두고 재배포하지 않음, docs/research.md §9)
+cache_dir = "eval/.cache"
+lock_file = "eval/datasets.lock.json"
+base_url = "https://huggingface.co/datasets/{id}/resolve/{revision}/{path}"
+
+[[dataset]]
+id = "NAMJOON/longmemeval-oracle-ko"
+revision = "b575d8945430cf66122fb8f6fead1006359a4a31"
+files = ["data/korean_only.jsonl", "README.md"]
+license = "MIT"
+updated = "2026-09-27"
+purpose = "Korean long-term conversational memory QA (oracle split, no distractor sessions)"
+stage = "S7"
+
+[[dataset]]
+id = "nlpai-lab/miracl-multilingual-triplets"
+revision = "71bc9f8e7d86b55203ed3104362b0661789a6c31"
+files = ["dataset/miracl_ko_triplet.parquet", "README.md"]
+license = "Apache-2.0"
+updated = "2026-07-16"
+purpose = "Korean Wikipedia passage retrieval (query, positive, hard negatives)"
+stage = "S7"
+
+[[dataset]]
+id = "mteb/belebele"
+revision = "979a211276faa22f671e69d096634193567cfd05"
+files = ["data/kor_Hang.jsonl", "README.md"]
+license = "CC-BY-SA-4.0"
+updated = "2026-02-26"
+purpose = "Korean passage retrieval built from reading-comprehension questions"
+stage = "S5"
+
+[[dataset]]
+id = "whooray/Ko-StrategyQA"
+revision = "5687166ada4ef4cc3da7193fdd556c6d2d55131c"
+files = ["corpus.jsonl", "queries.jsonl", "qrels/dev.jsonl", "README.md"]
+license = "unstated on card (upstream StrategyQA MIT); internal evaluation only"
+updated = "2026-02-21"
+purpose = "Korean multi-hop document retrieval at larger scale (9,251 docs)"
+stage = "S7"
+
+[[dataset]]
+id = "eskora/memory-contradiction-pairs-hard"
+revision = "1d2bb9739c5ace918248ad593abd2b2289e7d6cb"
+files = ["test-hard.jsonl", "valid-hard.jsonl", "README.md"]
+license = "CC-BY-4.0"
+updated = "2026-11-11"
+purpose = "memory contradiction vs update detection for the organizer (sample-check quality first)"
+stage = "S8"
+
+[[dataset]]
+id = "mteb/PawsXPairClassification"
+revision = "85a30d685fcfb89ca8dcb2317db39f5c67aa9fa6"
+files = ["ko/test-00000-of-00001.parquet", "ko/validation-00000-of-00001.parquet", "README.md"]
+license = "free use per Google PAWS-X terms (card: other)"
+updated = "2026-02-24"
+purpose = "Korean near-duplicate (paraphrase) detection"
+stage = "S8"

@@ -9,6 +9,7 @@
 | # | 질문 | 추천 | 막는 단계 |
 | :--- | :--- | :--- | :--- |
 | D6 | 한국어 기억·문서 평가셋을 Hugging Face에 공개할지 | S7 측정 후 결정 | S7 |
+| D12 | 음성·대본 수집(S5b)을 첫 릴리스에 넣을지 (`docs/design.md` §8.5) | 대본·대화 내보내기 가져오기는 첫 릴리스에 넣고(가벼움), 녹음 파일 음성 인식은 선택 설치로 첫 릴리스에 포함하되 측정(CER) 통과 시 | 릴리스 범위 |
 
 ## 확인할 가정
 
@@ -19,7 +20,7 @@
 | V4 | 클라이언트별 MCP 설정 파일 위치·형식, 구조화 출력·리소스·instructions 지원 (Claude Code·Claude Desktop·Cursor·VS Code·Gemini CLI·LM Studio) | 각 공식 문서, 확인 날짜 기록 | S2·S4 |
 | V5 | Claude Desktop 확장 묶음(MCPB) 형식이 현재 유지됨 | 공식 저장소 | 릴리스 체크리스트 |
 | V7 | MCP 요청 단계 URL 모드(elicitation)로 관리 화면 열기를 제안할 수 있는 클라이언트 | 규격 + 클라이언트 문서 | S3 |
-| V10 | macOS 커밋 내구성: `PRAGMA fullfsync` 없이 전원 차단 시 마지막 커밋 유실 가능성과 켰을 때 비용 | 측정 | S2 |
+| V10 | ~~macOS 커밋 내구성 비용~~ **확인 (2026-11-21): 켜면 p50 3.9 ms → 기본 켬** | `docs/measurements/s2-mcp-core.md` §2 | S2 |
 | V11 | `pypdf`·`markitdown`의 한국어 PDF 추출 품질 (띄어쓰기·순서) | 공개 한국어 PDF 묶음으로 측정 | S5 |
 | V12 | 로컬 모델(Ollama, OpenAI 호환)이 정리 판단을 정해진 형식으로 안정적으로 돌려주는지 | 측정 | S9 |
 | V13 | MCP 프롬프트가 클라이언트에서 슬래시 명령으로 보이는지 | 클라이언트별 시험 | S2 |
@@ -50,3 +51,11 @@
 | 2026-11-21 | 웹 수집은 http·https만, 사설·루프백·링크 로컬 주소 기본 차단 | `docs/design.md` §8.3 |
 | 2026-11-21 | AGPL·GPL 수집 라이브러리(pymupdf, html2text) 미사용, `httpx`는 간접 의존성만 허용 | `docs/research.md` §8 |
 | 2026-11-21 | MCP Sampling 미사용, 연결된 AI 정리는 `organize` 도구 방식 | 2026-07-28 규격 폐지 예정 (`docs/research.md` §2.4) |
+| 2026-11-21 | 기본 토크나이저는 한글 2-gram + 영숫자 단어, kiwi는 선택 설치(`gonlith[korean]`) | `docs/measurements/s2-mcp-core.md` §1 |
+| 2026-11-21 | `kiwipiepy-model` 0.24.0만 sdist 빌드 허용(데이터 전용 패키지, 빌드 스크립트 `setup()` 한 줄 확인), 빌드 도구 setuptools 84.2.1 고정 | `pyproject.toml` `[tool.uv]` |
+| 2026-11-21 | SQLite `fullfsync` 기본 켬 | `docs/measurements/s2-mcp-core.md` §2 |
+| 2026-11-21 | 검색 결과 상한은 개수가 아니라 출력 글자 수 예산(5만 자) | Claude Code MCP 출력 제한 문서 |
+| 2026-11-21 | MCP 처리 함수는 비동기(SQLite 연결 스레드 고정) | `docs/design.md` §11.1 |
+| 2026-11-21 | 반복 시험·평가는 로컬 Ollama 모델로, 유료 클라이언트는 호환 확인 때 한 번만 | 사용자 결정 |
+| 2026-11-21 | 음성은 파일 가져오기(녹음·대본)로 받는다. 실시간 음성 연결은 만들지 않는다(MCP 도구 입력에 음성 형식 없음) | `docs/research.md` §10 |
+| 2026-11-21 | 외부 평가셋은 평가에만 쓰고 저장소에 넣지 않는다. 목록은 `eval/datasets.toml` | `docs/research.md` §9 |

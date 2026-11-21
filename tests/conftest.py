@@ -30,6 +30,7 @@ def remember(store, content, **overrides):
         session="session-1",
         source="conversation",
         derived_from=[],
+        tags=[],
     )
     fields.update(overrides)
     return store.append_memory(content, **fields)

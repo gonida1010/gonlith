@@ -18,6 +18,7 @@ class VerifiedLog:
     leaf_hashes: list = field(default_factory=list)
     frontier: Frontier = field(default_factory=Frontier)
     memories: dict = field(default_factory=dict)
+    archives: dict = field(default_factory=dict)
     problems: list = field(default_factory=list)
     first_bad_position: int | None = None
 
@@ -73,11 +74,20 @@ def _apply(state, store, position, entry):
     if body["kind"] == "genesis":
         state.origin = body["origin"]
         return
+    if body["kind"] == "archive":
+        target = state.memories.get(body["target"])
+        if target is None or target["status"] != "active":
+            _fail(state, position, f"archive target {body['target']} is not an active memory")
+            return
+        target["status"] = "archived"
+        target["archived_at"] = position
+        state.archives[position] = body["target"]
+        return
     for target in body["derived_from"]:
         if target not in state.memories:
             _fail(state, position, f"derived_from {target} is not a memory")
             return
-    memory = dict(body, position=position, integrity="ok")
+    memory = dict(body, position=position, integrity="ok", status="active", origin=entries.origin_of(body["source"]))
     if not _content_ok(store, position, body["content_hash"]):
         memory["integrity"] = "broken"
         state.problems.append(Problem(position, "content missing or hash mismatch"))

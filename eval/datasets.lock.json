@@ -1,0 +1,66 @@
+{
+  "NAMJOON/longmemeval-oracle-ko@b575d8945430cf66122fb8f6fead1006359a4a31/README.md": {
+    "sha256": "a4669dd499fea0ed26a6b44b07c4dc63ee498f29af1ed03060fc4685335884da",
+    "size": 3548
+  },
+  "NAMJOON/longmemeval-oracle-ko@b575d8945430cf66122fb8f6fead1006359a4a31/data/korean_only.jsonl": {
+    "sha256": "a0b7089154e5c414bc3541c11d4b48b05195d3347ea17b8af9478a22b642b7f1",
+    "size": 16142589
+  },
+  "eskora/memory-contradiction-pairs-hard@1d2bb9739c5ace918248ad593abd2b2289e7d6cb/README.md": {
+    "sha256": "f44e2f3fe12ee86780f780302592aaa87c6625bc5e51ed1e0f77309729055fa3",
+    "size": 9635
+  },
+  "eskora/memory-contradiction-pairs-hard@1d2bb9739c5ace918248ad593abd2b2289e7d6cb/test-hard.jsonl": {
+    "sha256": "d9e8e5f3a53369981d11c835a0a4bf68b9b105ae0c8dd78b2d02df967645ff82",
+    "size": 112194
+  },
+  "eskora/memory-contradiction-pairs-hard@1d2bb9739c5ace918248ad593abd2b2289e7d6cb/valid-hard.jsonl": {
+    "sha256": "dd29c90d5343c5e7b59208de90f0334a7b63b2849c7941f990bf38d18320b384",
+    "size": 48085
+  },
+  "mteb/PawsXPairClassification@85a30d685fcfb89ca8dcb2317db39f5c67aa9fa6/README.md": {
+    "sha256": "e19679fc81154938f30938234a27d4edf8be51124a903bfec1714d2b570305b9",
+    "size": 8468
+  },
+  "mteb/PawsXPairClassification@85a30d685fcfb89ca8dcb2317db39f5c67aa9fa6/ko/test-00000-of-00001.parquet": {
+    "sha256": "f253ceb14694f5940a9310b47f6a63feac724e3c1517225123ab134f2c2e293d",
+    "size": 360011
+  },
+  "mteb/PawsXPairClassification@85a30d685fcfb89ca8dcb2317db39f5c67aa9fa6/ko/validation-00000-of-00001.parquet": {
+    "sha256": "ecb15737393f138eead898e4c11d748f934eca3f2269ee7c52aeffbe3f7e1a48",
+    "size": 349455
+  },
+  "mteb/belebele@979a211276faa22f671e69d096634193567cfd05/README.md": {
+    "sha256": "311c1a2dc30595eb6c7788c0c20548ea00169eef93dc5b0436c7ccdacaf84231",
+    "size": 25535
+  },
+  "mteb/belebele@979a211276faa22f671e69d096634193567cfd05/data/kor_Hang.jsonl": {
+    "sha256": "e995f945e9dd7a87ed9c2c727b3fac01cf0e82fa94989cf448266d4f1c136fe2",
+    "size": 1534047
+  },
+  "nlpai-lab/miracl-multilingual-triplets@71bc9f8e7d86b55203ed3104362b0661789a6c31/README.md": {
+    "sha256": "8659acdeb3640b802aa66acf00db29f5a52e211a0b3e205c690f22c94be2e238",
+    "size": 9303
+  },
+  "nlpai-lab/miracl-multilingual-triplets@71bc9f8e7d86b55203ed3104362b0661789a6c31/dataset/miracl_ko_triplet.parquet": {
+    "sha256": "57e420cae3d784bb44efdd1537a144e78279034382cc93119ee0199b83c8c746",
+    "size": 1807440
+  },
+  "whooray/Ko-StrategyQA@5687166ada4ef4cc3da7193fdd556c6d2d55131c/README.md": {
+    "sha256": "b092905522ea9868fffc9cb42c1894ab112ac05104c634eabb2b222f7e43af54",
+    "size": 2352
+  },
+  "whooray/Ko-StrategyQA@5687166ada4ef4cc3da7193fdd556c6d2d55131c/corpus.jsonl": {
+    "sha256": "c02b601c6cb2541dd16f06a12f2e9ef6366531f2e8b8a8f9ac3009b3939969c3",
+    "size": 7260383
+  },
+  "whooray/Ko-StrategyQA@5687166ada4ef4cc3da7193fdd556c6d2d55131c/qrels/dev.jsonl": {
+    "sha256": "52202165d353aa704ca815fa0559e16902c53058694ab34af30735da3602fe5d",
+    "size": 96138
+  },
+  "whooray/Ko-StrategyQA@5687166ada4ef4cc3da7193fdd556c6d2d55131c/queries.jsonl": {
+    "sha256": "ec5d5336328c816dc186d4dbfc0088dbd0c630a2c4781fe17501f73a59a15c79",
+    "size": 289974
+  }
+}

@@ -1,7 +1,7 @@
 # Gonlith 데이터 형식 규격
 
 > 설계 정본: [`docs/design.md`](design.md) §6·§7. 이 문서는 다른 구현이 Gonlith 로그를 바이트 단위로 같게 읽고 검증할 수 있게 하는 규격이다.
-> **상태:** 1차 (S1 범위, 설계 4판 반영). `genesis`·`memory` 항목, 엄격 판독, 체크포인트를 정의한다. `note`·`document`·`revise`·`archive`·`delete`·합치기 항목은 각 단계에서 추가한다. **공개 전까지 형식 판 1은 확정되지 않으며, 그 전에 만든 로그는 버린다** (`docs/design.md` §6.7).
+> **상태:** 2차 (S2 범위). `genesis`·`memory`·`archive` 항목, 엄격 판독, 체크포인트를 정의한다. `note`·`document`·`revise`·복구·`delete`·합치기 항목은 각 단계에서 추가한다. **공개 전까지 형식 판 1은 확정되지 않으며, 그 전에 만든 로그는 버린다** (`docs/design.md` §6.7).
 > 규범 용어 MUST/SHOULD는 RFC 2119·8174 뜻으로 쓴다.
 
 ## 1. 로그
@@ -89,6 +89,23 @@
 | `session` | 비어 있지 않은 문자열 | 서버가 발급한 세션 식별자 |
 | `source` | `"conversation"`·`"tool_output"`·`"web"`·`"file"`·`"user_typed"`·`"unknown"` 중 하나 | 쓰는 쪽이 밝힌 값 |
 | `derived_from` | 정수 배열 | 이 항목보다 앞선 `memory` 위치들. 오름차순, 중복 없음 |
+| `tags` | 문자열 배열 | 비어 있지 않은 문자열, 정렬·중복 없음 |
+
+* `origin`은 저장하지 않는다. 재생할 때 `source`에서 계산한다: `tool_output`·`web`·`file`이면 `external`, 그 밖은 `own` (`docs/design.md` §14.2).
+
+### 3.3 `archive` (휴지통)
+
+| 필드 | 형식 | 뜻 |
+| :--- | :--- | :--- |
+| `kind` | `"archive"` | |
+| `target` | 정수 | 휴지통으로 보낼 `memory` 위치. 이 항목보다 앞이어야 함 |
+| `recorded_at` | `timestamp` | 참고값 |
+| `writer` | `"agent"` 또는 `"human"` | |
+| `client` | 문자열 또는 `null` | 클라이언트가 밝힌 이름 |
+| `session` | 비어 있지 않은 문자열 | |
+| `reason` | 문자열 또는 `null` | |
+
+* 재생할 때 `target`이 활성 상태의 `memory`가 아니면 구조 오류다. 예: 이미 휴지통에 있는 기억을 또 보내는 경우.
 
 ## 4. 내용
 
@@ -119,4 +136,7 @@ C2SP [tlog-checkpoint](https://c2sp.org/tlog-checkpoint) 노트 본문:
 | 테이블 | 열 | 비고 |
 | :--- | :--- | :--- |
 | `log` | `position INTEGER PRIMARY KEY`, `entry BLOB NOT NULL` | `UPDATE`·`DELETE` 거부 트리거 (실수 방지용, 보안 장치 아님) |
-| `contents` | `position INTEGER PRIMARY KEY`, `salt BLOB NOT NULL`, `content BLOB NOT NULL` | 진짜 삭제(S12) 때 행을 지움 |
+| `contents` | `position INTEGER PRIMARY KEY`, `salt BLOB NOT NULL`, `content BLOB NOT NULL` | 진짜 삭제(S11) 때 행을 지움 |
+| `search_fts` | FTS5 `tokens`, `space UNINDEXED`, rowid = 위치 | 파생 색인. 활성 기억만. 로그 루트가 바뀌었거나 활성 기억과 어긋나면 다시 만듦 |
+| `dedup` | `space`, `norm_hash`, `position` | 완전 중복 확인용 파생 표 (NFKC·대소문자·공백 정규화 해시) |
+| `index_meta` | `key`, `value` | 색인의 토크나이저 이름·로그 루트 |
