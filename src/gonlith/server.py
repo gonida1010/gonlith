@@ -2,10 +2,12 @@
 import json
 import secrets
 from importlib.metadata import version
+from typing import Literal
 
 from mcp.server.mcpserver import Context, MCPServer
 from mcp.types import CallToolResult, TextContent
 
+from gonlith.entries import SOURCES
 from gonlith.service import ServiceError
 
 
@@ -58,20 +60,21 @@ def build_server(service, settings):
         name=server_settings["name"], version=version("gonlith"), instructions=server_settings["instructions"]
     )
 
+    Category = Literal[tuple(memory_settings["categories"])]
+    Source = Literal[SOURCES]
+
     @server.tool(name="remember", description=server_settings["remember_description"])
     async def remember(
         content: str,
         ctx: Context,
-        category: str | None = None,
+        category: Category | None = None,
         space: str | None = None,
         tags: list[str] | None = None,
         valid_from: str | None = None,
         valid_to: str | None = None,
-        source: str | None = None,
+        source: Source | None = None,
     ) -> CallToolResult:
         category = category or memory_settings["default_category"]
-        if category not in memory_settings["categories"]:
-            return _error(f"category must be one of {memory_settings['categories']}")
         try:
             outcome = service.remember(
                 content,

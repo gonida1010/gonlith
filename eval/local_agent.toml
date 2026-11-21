@@ -1,0 +1,24 @@
+# 로컬 모델(Ollama) MCP 하네스 설정: 모델·주소·단계 상한·교차 세션 기억 시나리오 (반복 시험은 로컬 모델로, docs/design.md §17)
+endpoint = "http://127.0.0.1:11434/api/chat"
+model = "qwen3.8:27b-mxfp8"
+think = false
+max_steps = 6
+request_timeout_seconds = 900
+
+[[scenario]]
+name = "coffee-preference"
+save = "내 커피 취향은 산미 없는 다크 로스트야. 기억해 줘."
+ask = "내 커피 취향 알고 있어? 짧게 답해 줘."
+expect = ["다크"]
+
+[[scenario]]
+name = "allergy-fact"
+save = "참고로 나 땅콩 알레르기 있어. 꼭 기억해 둬."
+ask = "내가 피해야 하는 음식이 있었나?"
+expect = ["땅콩"]
+
+[[scenario]]
+name = "project-decision"
+save = "이 프로젝트는 패키지 관리를 uv로 하기로 결정했어. 기억해."
+ask = "이 프로젝트 패키지 관리 도구 뭘로 하기로 했지?"
+expect = ["uv"]

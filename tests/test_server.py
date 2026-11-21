@@ -42,6 +42,10 @@ def test_tools_are_listed_with_configured_descriptions(server):
     tools = {tool.name: tool for tool in run(app, steps).tools}
     assert set(tools) == {"remember", "search", "forget"}
     assert tools["remember"].description == settings["server"]["remember_description"]
+    properties = tools["remember"].input_schema["properties"]
+    schema_text = json.dumps(properties)
+    assert all(category in schema_text for category in settings["memory"]["categories"])
+    assert "conversation" in schema_text and "web" in schema_text
 
 
 def test_remember_search_forget_round_trip(server):
@@ -89,7 +93,7 @@ def test_invalid_input_returns_tool_error(server):
         return bad_category, missing
 
     bad_category, missing = run(app, steps)
-    assert bad_category.is_error and "category must be one of" in text_of(bad_category)
+    assert bad_category.is_error and "category" in text_of(bad_category) and "preference" in text_of(bad_category)
     assert missing.is_error
 
 
