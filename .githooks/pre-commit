@@ -1,0 +1,3 @@
+#!/bin/sh
+# 커밋 전에 스테이징된 변경에서 비밀값을 gitleaks로 검사하는 훅
+exec gitleaks git --pre-commit --staged --redact --no-banner --verbose

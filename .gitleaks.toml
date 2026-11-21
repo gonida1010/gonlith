@@ -1,0 +1,9 @@
+# gitleaks 기본 규칙에 기본 규칙이 놓치는 Notion 통합 토큰 규칙을 더한 설정
+[extend]
+useDefault = true
+
+[[rules]]
+id = "notion-integration-token"
+description = "Notion integration token"
+regex = '''\bntn_[A-Za-z0-9]+'''
+keywords = ["ntn_"]

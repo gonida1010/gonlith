@@ -1,0 +1,4 @@
+# gonlith 기본 설정값 (각 값의 출처: docs/configuration.md)
+[storage]
+database_file = "gonlith.db"
+busy_timeout_seconds = 5.0

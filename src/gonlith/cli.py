@@ -1,0 +1,62 @@
+# gonlith 명령줄: 데이터 폴더 초기화(init)와 로그 전체 재검증(verify) (docs/design.md §6.7, §7.2)
+import json
+import sys
+
+import typer
+
+from gonlith.config import data_home, load_settings
+from gonlith.store import Store, StoreError
+from gonlith.verify import replay
+
+app = typer.Typer(no_args_is_help=True, add_completion=False)
+
+
+def _open_store():
+    home = data_home()
+    return Store.open(home, load_settings(home))
+
+
+@app.command()
+def init():
+    """Create the log and print the recovery key once."""
+    store = _open_store()
+    try:
+        recovery = store.initialize()
+    except StoreError as error:
+        typer.echo(f"error: {error}", err=True)
+        raise typer.Exit(1) from error
+    finally:
+        store.close()
+    typer.echo("Recovery key (shown once, not stored; write it down and keep it offline):", err=True)
+    typer.echo(recovery)
+
+
+@app.command()
+def verify(as_json: bool = typer.Option(False, "--json", help="Print the result as JSON.")):
+    """Replay the whole log and report integrity problems."""
+    store = _open_store()
+    try:
+        state = replay(store)
+    finally:
+        store.close()
+    result = {
+        "ok": state.ok,
+        "size": state.size,
+        "memories": len(state.memories),
+        "broken": sorted(p for p, m in state.memories.items() if m["integrity"] != "ok"),
+        "first_bad_position": state.first_bad_position,
+        "problems": [{"position": p.position, "reason": p.reason} for p in state.problems],
+        "checkpoint": state.checkpoint() if state.origin else None,
+    }
+    if as_json:
+        json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
+        sys.stdout.write("\n")
+    else:
+        typer.echo("OK" if state.ok else "PROBLEMS FOUND")
+        typer.echo(f"entries: {result['size']}  memories: {result['memories']}  broken: {len(result['broken'])}")
+        for problem in result["problems"]:
+            typer.echo(f"  position {problem['position']}: {problem['reason']}")
+        if result["checkpoint"]:
+            typer.echo("checkpoint:")
+            typer.echo(result["checkpoint"], nl=False)
+    raise typer.Exit(0 if state.ok else 1)

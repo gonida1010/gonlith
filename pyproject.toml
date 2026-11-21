@@ -1,0 +1,34 @@
+# gonlith 패키지 정의와 의존성·공급망 설정
+[build-system]
+requires = ["uv_build>=0.13,<0.14"]
+build-backend = "uv_build"
+
+[project]
+name = "gonlith"
+version = "0.0.1"
+description = "Local MCP memory for AI agents that is human-signed, verified on every read, and rollback-evident"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = [
+    "cryptography>=50.0.2",
+    "platformdirs>=4.14",
+    "typer>=0.29",
+]
+
+[project.scripts]
+gonlith = "gonlith.cli:app"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.170",
+    "pytest>=9.2",
+]
+
+[tool.uv]
+exclude-newer = "1 week"
+no-build = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
